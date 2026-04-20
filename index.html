@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JMC Recruit — Jaya Makmur Cuisine</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f11;--bg2:#17171a;--bg3:#1e1e22;--bg4:#252529;
+  --border:#2e2e33;--border2:#3a3a40;
+  --text:#f0f0f0;--text2:#a0a0aa;--text3:#60606a;
+  --blue:#4f8ef7;--blue-d:#2563eb;--blue-l:rgba(79,142,247,.12);--blue-l2:rgba(79,142,247,.06);
+  --green:#34d399;--green-d:#059669;--green-l:rgba(52,211,153,.12);
+  --amber:#fbbf24;--amber-d:#d97706;--amber-l:rgba(251,191,36,.12);
+  --red:#f87171;--red-d:#dc2626;--red-l:rgba(248,113,113,.12);
+  --purple:#a78bfa;--purple-d:#7c3aed;--purple-l:rgba(167,139,250,.12);
+  --teal:#2dd4bf;--teal-l:rgba(45,212,191,.12);
+  --radius:10px;--radius-lg:14px;--radius-xl:18px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;height:100vh;overflow:hidden}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::selection{background:var(--blue-l);color:var(--blue)}
+
+/* ─── LAYOUT ─── */
+.app{display:flex;height:100vh;overflow:hidden;position:relative}
+.sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.content{flex:1;overflow-y:auto;padding:20px}
+.page{display:none;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ─── SIDEBAR ─── */
+.logo{padding:16px 14px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--blue-d));border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 20px rgba(79,142,247,.3)}
+.logo-title{font-size:13px;font-weight:700;letter-spacing:-.2px}
+.logo-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.nav-sec{padding:12px 8px 4px}
+.nav-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding:0 8px;margin-bottom:4px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:var(--radius);cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;user-select:none;font-weight:500}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--blue-l);color:var(--blue)}
+.nav-item.active svg{opacity:1}
+.nav-item svg{opacity:.5}
+.nav-badge{margin-left:auto;border-radius:20px;padding:1px 6px;font-size:10px;font-weight:700;background:var(--red-l);color:var(--red)}
+.nav-badge.blue{background:var(--blue-l);color:var(--blue)}
+.sidebar-footer{margin-top:auto;padding:10px 8px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:9px;padding:8px;border-radius:var(--radius);background:var(--bg3)}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.user-name{font-size:12px;font-weight:600}
+.user-role{font-size:10px;color:var(--text3)}
+
+/* ─── TOPBAR ─── */
+.topbar-title{font-size:15px;font-weight:700;letter-spacing:-.3px;flex:1}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap;font-weight:500}
+.btn:hover{background:var(--bg4);border-color:var(--border2)}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 20px rgba(79,142,247,.2)}
+.btn-primary:hover{background:var(--blue-d);border-color:var(--blue-d)}
+.btn-success{background:var(--green-d);border-color:var(--green-d);color:#fff}
+.btn-success:hover{background:#047857}
+.btn-warning{background:var(--amber-d);border-color:var(--amber-d);color:#fff}
+.btn-danger{border-color:rgba(248,113,113,.3);color:var(--red);background:var(--red-l)}
+.btn-danger:hover{background:rgba(248,113,113,.2)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-xs{padding:3px 7px;font-size:10px}
+.btn-ghost{background:transparent;border-color:transparent}
+.btn-ghost:hover{background:var(--bg3)}
+
+/* ─── CARDS ─── */
+.sec-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-title{font-size:13px;font-weight:700;letter-spacing:-.2px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--blue));opacity:.6}
+.stat-lbl{font-size:11px;color:var(--text3);font-weight:500;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+.stat-val{font-size:26px;font-weight:700;letter-spacing:-.5px}
+.stat-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ─── BADGES ─── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;letter-spacing:.02em}
+.b-sc{background:var(--blue-l);color:var(--blue)}
+.b-iv{background:var(--amber-l);color:var(--amber)}
+.b-of{background:var(--green-l);color:var(--green)}
+.b-rj{background:var(--red-l);color:var(--red)}
+.b-ob{background:var(--purple-l);color:var(--purple)}
+.b-rec{background:var(--green-l);color:var(--green)}
+.b-nrec{background:var(--red-l);color:var(--red)}
+.b-pend{background:var(--bg4);color:var(--text3)}
+.b-sch{background:var(--teal-l);color:var(--teal)}
+.tag{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:10px;color:var(--text2);font-weight:500}
+
+/* ─── TABLE ─── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.06em;background:var(--bg)}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.dr{cursor:pointer;transition:background .1s}
+tr.dr:hover td{background:var(--bg3)}
+.nm-cell{display:flex;align-items:center;gap:8px}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+
+/* ─── FILTERS ─── */
+.filters{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.si{padding:7px 11px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--bg2);color:var(--text);font-family:var(--font);width:190px;transition:border .15s}
+.si:focus,.fi:focus,.finput:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,142,247,.1)}
+select.fi{padding:6px 9px;border:1px solid var(--border);border-radius:var(--radius);font-size:11px;background:var(--bg2);color:var(--text);font-family:var(--font);cursor:pointer}
+.vtog{display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);padding:3px;border-radius:var(--radius);margin-left:auto}
+.vt{padding:4px 10px;border-radius:7px;border:none;background:none;cursor:pointer;font-size:11px;color:var(--text3);font-family:var(--font);font-weight:600;transition:all .12s}
+.vt.active{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+
+/* ─── KANBAN ─── */
+.kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
+.k-col{min-width:195px;max-width:210px;flex-shrink:0}
+.k-hdr{font-size:11px;font-weight:700;padding:6px 0;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;text-transform:uppercase;letter-spacing:.06em}
+.k-cnt{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:1px 7px;font-size:10px;color:var(--text2)}
+.k-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:11px 12px;margin-bottom:8px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.k-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--col,var(--border))}
+.k-card:hover{border-color:var(--border2);background:var(--bg3);transform:translateY(-1px)}
+.k-name{font-size:12px;font-weight:700;margin-bottom:2px}
+.k-pos{font-size:10px;color:var(--text2)}
+.k-dept{font-size:10px;color:var(--text3);margin-top:2px}
+.k-foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+
+/* ─── PIPELINE BARS ─── */
+.pipe-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pipe-lbl{width:84px;font-size:11px;color:var(--text2)}
+.pipe-track{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.pipe-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.pipe-cnt{width:20px;font-size:11px;color:var(--text3);text-align:right;font-weight:600}
+.hbar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.hbl{width:75px;font-size:10px;color:var(--text2);text-align:right}
+.hbt{flex:1;height:12px;background:var(--bg);border-radius:3px;overflow:hidden}
+.hbf{height:100%;border-radius:3px}
+.hbv{width:20px;font-size:10px;color:var(--text3);font-weight:600}
+
+/* ─── MODAL ─── */
+.mo{position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:flex-start;justify-content:center;z-index:200;overflow-y:auto;padding:20px;backdrop-filter:blur(4px)}
+.mo.hidden{display:none}
+.modal{background:var(--bg2);border-radius:var(--radius-xl);border:1px solid var(--border2);width:100%;max-width:580px;padding:22px;box-shadow:0 40px 80px rgba(0,0,0,.6);animation:modalIn .2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:none}}
+.modal-title{font-size:15px;font-weight:700;letter-spacing:-.3px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+.xbtn{background:var(--bg3);border:1px solid var(--border);cursor:pointer;color:var(--text2);font-size:16px;padding:0;line-height:1;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:all .15s}
+.xbtn:hover{background:var(--bg4);color:var(--text)}
+
+/* ─── FORMS ─── */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fgg{grid-column:1/-1}
+.fgroup{display:flex;flex-direction:column;gap:4px}
+.flbl{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.finput{padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--bg3);color:var(--text);font-family:var(--font);transition:border .15s}
+textarea.finput{resize:vertical;min-height:60px}
+.factions{display:flex;justify-content:flex-end;gap:7px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.req{color:var(--red)}
+
+/* ─── STARS ─── */
+.stars span{cursor:pointer;font-size:20px;color:var(--border2);transition:all .1s}
+.stars span.lit,.stars:hover span:hover,.stars:hover span:hover~span+span{color:var(--amber)}
+.stars span.lit{color:var(--amber)}
+
+/* ─── CV UPLOAD ─── */
+.cv-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:16px;text-align:center;font-size:11px;color:var(--text3);cursor:pointer;transition:all .15s;position:relative;background:var(--bg)}
+.cv-zone:hover{border-color:var(--blue);background:var(--blue-l2)}
+.cv-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.cv-prog{width:100%;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:8px;display:none}
+.cv-prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
+
+/* ─── DEPT ─── */
+.dept-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+.dept-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;font-size:13px;font-weight:700;border-bottom:1px solid var(--border)}
+.dept-pos{padding:10px 14px;display:flex;flex-wrap:wrap;gap:5px}
+.ptag{display:inline-flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:500}
+.pdel{background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0;line-height:1;transition:color .1s}
+.pdel:hover{color:var(--red)}
+
+/* ─── DETAIL ─── */
+.detail-row{display:flex;gap:10px;margin-bottom:7px;font-size:12px}
+.dkey{color:var(--text3);width:120px;flex-shrink:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding-top:1px}
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+/* ─── ACTIVITY ─── */
+.act-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;transition:background .1s}
+.act-item:last-child{border-bottom:none}
+.act-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:4px;box-shadow:0 0 6px var(--blue)}
+.act-time{font-size:10px;color:var(--text3);white-space:nowrap;font-family:var(--mono)}
+
+/* ─── NOTIFICATIONS ─── */
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .15s}
+.notif-item.read{opacity:.5}
+.notif-item:last-child{border-bottom:none}
+.nd{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.nd.unread{background:var(--blue);box-shadow:0 0 8px var(--blue)}
+.nd.read{background:var(--border2)}
+.notif-time{font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ─── SCHEDULE ─── */
+.sched-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s}
+.sched-card:hover{border-color:var(--border2);background:var(--bg3)}
+.sched-date{width:46px;height:46px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;background:var(--blue-l);border:1px solid rgba(79,142,247,.2)}
+.sched-day{font-size:18px;font-weight:800;color:var(--blue);line-height:1}
+.sched-mo{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--blue);opacity:.7}
+.sched-info{flex:1;min-width:0}
+.sched-name{font-size:13px;font-weight:700}
+.sched-meta{font-size:11px;color:var(--text2)}
+.sched-loc{font-size:11px;color:var(--teal);margin-top:2px}
+
+/* ─── SALARY ─── */
+.sal-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-bottom:7px}
+.sal-name-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:8px}
+.sal-bar-track{flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:visible;position:relative}
+.sal-bar-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.sal-bar-budget{position:absolute;top:-4px;bottom:-4px;width:2px;border-radius:1px;background:var(--red)}
+.sal-amount{font-size:11px;font-weight:700;color:var(--text);white-space:nowrap}
+
+/* ─── TABS ─── */
+.tab-bar{display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);padding:3px;border-radius:var(--radius);margin-bottom:16px;width:fit-content}
+.tab-btn{padding:6px 13px;border-radius:8px;border:none;background:none;cursor:pointer;font-size:12px;color:var(--text2);font-family:var(--font);font-weight:600;transition:all .12s}
+.tab-btn.active{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
+
+/* ─── PROGRESS STEPS ─── */
+.progress-steps{display:flex;align-items:center;margin-bottom:16px}
+.step{display:flex;flex-direction:column;align-items:center;flex:1}
+.step-circle{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;border:2px solid var(--border);background:var(--bg);color:var(--text3);z-index:1;transition:all .3s}
+.step-circle.done{border-color:var(--green);background:var(--green);color:#000}
+.step-circle.current{border-color:var(--blue);background:var(--blue);color:#fff;box-shadow:0 0 12px rgba(79,142,247,.4)}
+.step-lbl{font-size:8px;color:var(--text3);margin-top:3px;text-align:center;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.step-lbl.current{color:var(--blue)}
+.step-line{flex:1;height:2px;background:var(--border);margin-top:-13px;transition:background .3s}
+.step-line.done{background:var(--green)}
+
+/* ─── PDF PREVIEW ─── */
+.pdf-preview{background:#fff;color:#111;border-radius:var(--radius);padding:20px;font-size:12px;line-height:1.7;max-height:360px;overflow-y:auto}
+
+/* ─── SUMMARY STATS ─── */
+.sum-stat{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;text-align:center}
+.sum-val{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.sum-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-top:2px}
+
+/* ─── SETUP ─── */
+.setup-banner{background:var(--blue-l);border:1px solid rgba(79,142,247,.2);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--blue);display:flex;align-items:flex-start;gap:9px}
+.setup-banner.hidden{display:none}
+
+/* ─── TOAST ─── */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:10px 16px;border-radius:var(--radius);font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:all .25s;pointer-events:none;box-shadow:var(--shadow)}
+.toast.show{opacity:1;transform:translateY(-2px)}
+
+/* ─── EMPTY STATE ─── */
+.empty{text-align:center;padding:40px;color:var(--text3);font-size:12px}
+.empty-icon{font-size:32px;margin-bottom:8px;opacity:.3}
+
+/* ─── SCROLLABLE KANBAN FIX ─── */
+.kanban::-webkit-scrollbar{height:4px}
+
+/* ─── SALARY LEGEND ─── */
+.sal-legend{display:flex;gap:16px;font-size:10px;color:var(--text3);margin-bottom:12px;align-items:center}
+.ldot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* ─── SEARCH HIGHLIGHT ─── */
+mark{background:rgba(251,191,36,.25);color:var(--amber);border-radius:2px;padding:0 1px}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .grid2{grid-template-columns:1fr}
+  .fg{grid-template-columns:1fr}
+  .fgg{grid-column:auto}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="7" cy="6" r="3.5" fill="#fff" opacity=".9"/>
+        <path d="M1 16c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <circle cx="14" cy="7" r="2.5" fill="#fff" opacity=".55"/>
+        <path d="M11.5 15c0-2 1.1-3.5 2.8-3.5" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-title">JMC Recruit</div>
+      <div class="logo-sub">Jaya Makmur Cuisine</div>
+    </div>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Overview</div>
+    <div class="nav-item active" id="nav-dashboard" onclick="go('dashboard')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".9"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".5"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".3"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" id="nav-notifications" onclick="go('notifications')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2a5 5 0 0 0-5 5v2l-1.5 2h13L13 9V7a5 5 0 0 0-5-5z" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 13a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Notifikasi <span class="nav-badge" id="notif-badge" style="display:none">0</span>
+    </div>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Rekrutmen</div>
+    <div class="nav-item" id="nav-candidates" onclick="go('candidates')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="3.5" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 14.5c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Kandidat <span class="nav-badge blue" id="nav-cnt">0</span>
+    </div>
+    <div class="nav-item" id="nav-pipeline" onclick="go('pipeline')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="2.5" rx="1" fill="currentColor" opacity=".9"/><rect x="1" y="7.5" width="10" height="2.5" rx="1" fill="currentColor" opacity=".6"/><rect x="1" y="12" width="6" height="2.5" rx="1" fill="currentColor" opacity=".4"/></svg>
+      Pipeline
+    </div>
+    <div class="nav-item" id="nav-schedule" onclick="go('schedule')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 1v2M11 1v2M1 6h14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="5" cy="10" r="1" fill="currentColor"/><circle cx="8" cy="10" r="1" fill="currentColor"/><circle cx="11" cy="10" r="1" fill="currentColor"/></svg>
+      Jadwal Interview
+    </div>
+    <div class="nav-item" id="nav-salary" onclick="go('salary')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4v1.5M8 10.5V12M6 7.5c0-1 .9-1.5 2-1.5s2 .7 2 1.5-2 1-2 2 .9 1.5 2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Perbandingan Gaji
+    </div>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Laporan</div>
+    <div class="nav-item" id="nav-reports" onclick="go('reports')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 1h7l3 3v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.3"/><path d="M10 1v3h3M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Laporan & Export
+    </div>
+    <div class="nav-item" id="nav-activity" onclick="go('activity')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Activity Log
+    </div>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Pengaturan</div>
+    <div class="nav-item" id="nav-departments" onclick="go('departments')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="4" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="7" width="6" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="7" width="6" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
+      Departemen
+    </div>
+    <div class="nav-item" id="nav-setup" onclick="go('setup')">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.1 3.1l1.4 1.4M11.5 11.5l1.4 1.4M3.1 12.9l1.4-1.4M11.5 4.5l1.4-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Storage Setup
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-av">HR</div>
+      <div>
+        <div class="user-name">Admin</div>
+        <div class="user-role">HR Manager</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-actions" id="topbar-actions"></div>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="setup-banner hidden" id="setup-banner">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v4M8 11v.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <div>CV upload disimpan lokal. <span style="cursor:pointer;text-decoration:underline;font-weight:700" onclick="go('setup')">Setup Supabase gratis</span> untuk cloud storage 1GB.</div>
+      </div>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="grid2">
+        <div class="sec-card"><div class="sec-hdr"><span class="sec-title">Hiring Pipeline</span></div><div id="pipe-chart"></div></div>
+        <div class="sec-card"><div class="sec-hdr"><span class="sec-title">Per Departemen</span></div><div id="dept-chart"></div></div>
+        <div class="sec-card"><div class="sec-hdr"><span class="sec-title">Interview Hari Ini & Besok</span><button class="btn btn-sm" onclick="go('schedule')">Lihat semua</button></div><div id="upcoming-int"></div></div>
+        <div class="sec-card"><div class="sec-hdr"><span class="sec-title">Kandidat Terbaru</span><button class="btn btn-sm" onclick="go('candidates')">Lihat semua</button></div><div class="table-wrap" id="recent-tbl"></div></div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="page" id="page-notifications">
+      <div class="sec-card">
+        <div class="sec-hdr"><span class="sec-title">Notifikasi</span><button class="btn btn-sm" onclick="markAllRead()">Tandai semua dibaca</button></div>
+        <div id="notif-list"></div>
+      </div>
+    </div>
+
+    <!-- CANDIDATES -->
+    <div class="page" id="page-candidates">
+      <div class="filters">
+        <input class="si" type="text" placeholder="Cari nama, email, posisi, catatan..." id="si" oninput="renderCands()">
+        <select class="fi" id="fd" onchange="updatePosFilter();renderCands()"><option value="">Semua dept</option></select>
+        <select class="fi" id="fp" onchange="renderCands()"><option value="">Semua posisi</option></select>
+        <select class="fi" id="fs" onchange="renderCands()"><option value="">Semua status</option><option>Screening</option><option>Interview</option><option>Offered</option><option>Rejected</option><option>Onboarding</option></select>
+        <select class="fi" id="fr" onchange="renderCands()"><option value="">Semua rec</option><option>Recommended</option><option>Not Recommended</option></select>
+        <select class="fi" id="fref" onchange="renderCands()"><option value="">Semua ref</option><option>Yes</option><option>No</option><option>Pending</option></select>
+        <div class="vtog"><button class="vt active" id="vt-t" onclick="setView('table')">Tabel</button><button class="vt" id="vt-k" onclick="setView('kanban')">Kanban</button></div>
+      </div>
+      <div id="cands-view"></div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="page" id="page-pipeline"><div id="pipe-kanban"></div></div>
+
+    <!-- SCHEDULE -->
+    <div class="page" id="page-schedule"><div id="schedule-content"></div></div>
+
+    <!-- SALARY -->
+    <div class="page" id="page-salary"><div id="salary-content"></div></div>
+
+    <!-- REPORTS -->
+    <div class="page" id="page-reports">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="rep-tab-export" onclick="switchRepTab('export')">Export Data</button>
+        <button class="tab-btn" id="rep-tab-pdf" onclick="switchRepTab('pdf')">PDF Kandidat</button>
+        <button class="tab-btn" id="rep-tab-summary" onclick="switchRepTab('summary')">Ringkasan</button>
+      </div>
+      <div id="rep-export">
+        <div class="sec-card" style="max-width:500px">
+          <div class="sec-hdr"><span class="sec-title">Export ke Excel / CSV</span></div>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.8">Export data kandidat ke file Excel (format lengkap dengan 2 sheet) atau CSV untuk Google Sheets.</p>
+          <div style="display:grid;gap:9px;margin-bottom:16px">
+            <div class="fgroup"><label class="flbl">Filter Departemen</label><select class="finput" id="exp-dept"><option value="">Semua departemen</option></select></div>
+            <div class="fgroup"><label class="flbl">Filter Status</label><select class="finput" id="exp-status"><option value="">Semua status</option><option>Screening</option><option>Interview</option><option>Offered</option><option>Rejected</option><option>Onboarding</option></select></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-success" onclick="exportExcel()">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 1h7l3 3v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.3"/><path d="M10 1v3h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M6 9l1.5 2L9 9M5 13h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Download Excel (.xlsx)
+            </button>
+            <button class="btn" onclick="exportCSV()">Download CSV</button>
+          </div>
+        </div>
+      </div>
+      <div id="rep-pdf" style="display:none">
+        <div class="sec-card" style="max-width:540px">
+          <div class="sec-hdr"><span class="sec-title">Generate PDF Kandidat</span></div>
+          <div class="fgroup" style="margin-bottom:13px"><label class="flbl">Pilih Kandidat</label><select class="finput" id="pdf-cand-sel" onchange="renderPDFPreview()"><option value="">-- Pilih kandidat --</option></select></div>
+          <div id="pdf-preview-wrap"></div>
+          <div style="margin-top:12px" id="pdf-actions" class="hidden"><button class="btn btn-primary" onclick="printPDF()">Print / Save as PDF</button></div>
+        </div>
+      </div>
+      <div id="rep-summary" style="display:none"><div id="summary-content"></div></div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="page" id="page-activity">
+      <div class="sec-card">
+        <div class="sec-hdr"><span class="sec-title">Activity Log</span><button class="btn btn-sm btn-danger" onclick="clearAct()">Hapus Log</button></div>
+        <div id="act-list"></div>
+      </div>
+    </div>
+
+    <!-- DEPARTMENTS -->
+    <div class="page" id="page-departments">
+      <div style="margin-bottom:12px"><button class="btn btn-primary" onclick="openDeptModal()">+ Tambah Departemen</button></div>
+      <div id="dept-list"></div>
+    </div>
+
+    <!-- SETUP -->
+    <div class="page" id="page-setup">
+      <div class="sec-card" style="max-width:540px">
+        <div class="sec-hdr"><span class="sec-title">Supabase Storage Setup (Gratis)</span></div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.8">
+          1. Buat akun gratis di <a href="https://supabase.com" target="_blank" style="color:var(--blue)">supabase.com</a><br>
+          2. Buat project baru → Storage → buat bucket bernama <code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-family:var(--mono)">cvs</code> → set ke Public<br>
+          3. Project Settings → API → salin URL dan anon key di bawah
+        </p>
+        <div style="display:grid;gap:10px;margin-bottom:14px">
+          <div class="fgroup"><label class="flbl">Supabase Project URL</label><input class="finput" id="sb-url" placeholder="https://xxxxxxxxxxxx.supabase.co" oninput="saveSBConfig()"></div>
+          <div class="fgroup"><label class="flbl">Supabase Anon Key</label><input class="finput" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." oninput="saveSBConfig()"></div>
+        </div>
+        <div id="sb-status" style="font-size:11px;margin-bottom:12px;min-height:18px"></div>
+        <button class="btn btn-primary" onclick="testSB()">Test Koneksi</button>
+        <div class="divider"></div>
+        <p style="font-size:11px;color:var(--text3);line-height:1.7"><strong style="color:var(--text2)">Tanpa Supabase:</strong> CV disimpan sebagai base64 (max ~4MB/file, hanya di browser ini).<br><strong style="color:var(--text2)">Dengan Supabase:</strong> Semua ukuran file, link download permanen, bisa diakses dari browser mana pun.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MODAL: CANDIDATE ══ -->
+<div class="mo hidden" id="mo-cand">
+<div class="modal">
+  <div class="modal-title"><span id="mc-title">Tambah Kandidat</span><button class="xbtn" onclick="closeM('mo-cand')">×</button></div>
+  <div id="cand-prog" style="margin-bottom:16px"></div>
+  <div class="fg">
+    <div class="fgroup"><label class="flbl">Nama Lengkap <span class="req">*</span></label><input class="finput" id="c-name" placeholder="Budi Santoso"></div>
+    <div class="fgroup"><label class="flbl">No. Telepon <span class="req">*</span></label><input class="finput" id="c-phone" placeholder="+62 812 ..."></div>
+    <div class="fgroup fgg"><label class="flbl">Email <span class="req">*</span></label><input class="finput" id="c-email" type="email" placeholder="email@example.com"></div>
+    <div class="fgroup"><label class="flbl">Departemen <span class="req">*</span></label><select class="finput" id="c-dept" onchange="updPos()"><option value="">Pilih departemen</option></select></div>
+    <div class="fgroup"><label class="flbl">Posisi Dilamar <span class="req">*</span></label><select class="finput" id="c-pos"><option value="">Pilih posisi</option></select></div>
+    <div class="fgroup"><label class="flbl">Status</label><select class="finput" id="c-status"><option>Screening</option><option>Interview</option><option>Offered</option><option>Rejected</option><option>Onboarding</option></select></div>
+    <div class="fgroup"><label class="flbl">Expected Salary (IDR/bulan)</label><input class="finput" id="c-sal" type="number" placeholder="4500000"></div>
+    <div class="fgroup"><label class="flbl">Rekomendasi</label><select class="finput" id="c-rec"><option value="">Belum ditentukan</option><option>Recommended</option><option>Not Recommended</option></select></div>
+    <div class="fgroup"><label class="flbl">Reference Check</label><select class="finput" id="c-ref"><option>Pending</option><option>Yes</option><option>No</option></select></div>
+    <div class="fgroup"><label class="flbl">Rating (1–5)</label><div class="stars" id="c-stars" style="padding:5px 0"><span onclick="setRating(1)" data-r="1">★</span><span onclick="setRating(2)" data-r="2">★</span><span onclick="setRating(3)" data-r="3">★</span><span onclick="setRating(4)" data-r="4">★</span><span onclick="setRating(5)" data-r="5">★</span></div><input type="hidden" id="c-rating" value="0"></div>
+    <div class="fgroup fgg">
+      <label class="flbl">CV / Resume</label>
+      <div class="cv-zone" id="cv-zone">
+        <input type="file" id="cv-file" accept=".pdf,.doc,.docx,.png,.jpg" onchange="handleCVSelect(event)">
+        <div id="cv-label" style="pointer-events:none">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" style="margin-bottom:5px;opacity:.3"><path d="M3 12h10M8 3v7M5 6l3-3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>Klik atau drag untuk upload CV</div>
+          <div style="font-size:10px;margin-top:2px;opacity:.6">PDF, DOC, DOCX — maks 4MB (lokal) / tidak terbatas (Supabase)</div>
+        </div>
+        <div class="cv-prog" id="cv-prog"><div class="cv-prog-fill" id="cv-prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="fgroup fgg"><label class="flbl">Catatan / Komentar</label><textarea class="finput" id="c-notes" placeholder="Catatan tentang kandidat ini..."></textarea></div>
+  </div>
+  <div class="factions"><button class="btn" onclick="closeM('mo-cand')">Batal</button><button class="btn btn-primary" onclick="saveCand()">Simpan Kandidat</button></div>
+</div>
+</div>
+
+<!-- ══ MODAL: DETAIL ══ -->
+<div class="mo hidden" id="mo-detail">
+<div class="modal" style="max-width:620px">
+  <div class="modal-title">
+    <span>Profil Kandidat</span>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="btn btn-sm" id="det-edit">Edit</button>
+      <button class="btn btn-sm" id="det-sched-btn" style="background:var(--teal-l);color:var(--teal);border-color:rgba(45,212,191,.2)">+ Jadwal Interview</button>
+      <button class="btn btn-sm btn-danger" id="det-del">Hapus</button>
+      <button class="xbtn" onclick="closeM('mo-detail')">×</button>
+    </div>
+  </div>
+  <div id="det-content"></div>
+  <div id="det-sched-form" class="hidden" style="margin-top:14px">
+    <div class="divider"></div>
+    <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--teal)">Jadwalkan Interview</div>
+    <div class="fg">
+      <div class="fgroup"><label class="flbl">Tanggal <span class="req">*</span></label><input class="finput" type="date" id="sch-date"></div>
+      <div class="fgroup"><label class="flbl">Waktu <span class="req">*</span></label><input class="finput" type="time" id="sch-time" value="09:00"></div>
+      <div class="fgroup fgg"><label class="flbl">Lokasi / Link Meeting</label><input class="finput" id="sch-loc" placeholder="Ruang Rapat A / https://zoom.us/..."></div>
+      <div class="fgroup fgg"><label class="flbl">Nama Interviewer</label><input class="finput" id="sch-interviewer" placeholder="Nama interviewer"></div>
+      <div class="fgroup fgg"><label class="flbl">Catatan Interview</label><textarea class="finput" id="sch-notes" placeholder="Topik yang akan dibahas, persiapan kandidat..." style="min-height:50px"></textarea></div>
+    </div>
+    <div style="display:flex;gap:7px;margin-top:9px">
+      <button class="btn btn-success btn-sm" onclick="saveSchedule()">Simpan Jadwal</button>
+      <button class="btn btn-sm" onclick="document.getElementById('det-sched-form').classList.add('hidden')">Batal</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODAL: DEPARTMENT ══ -->
+<div class="mo hidden" id="mo-dept">
+<div class="modal" style="max-width:440px">
+  <div class="modal-title"><span id="dept-m-title">Tambah Departemen</span><button class="xbtn" onclick="closeM('mo-dept')">×</button></div>
+  <div class="fgroup" style="margin-bottom:10px">
+    <label class="flbl">Nama Departemen <span class="req">*</span></label>
+    <input class="finput" id="dept-nm" placeholder="e.g. Kitchen">
+  </div>
+  <div class="fgroup" style="margin-bottom:10px">
+    <label class="flbl">Budget Rata-rata (IDR/bulan)</label>
+    <input class="finput" id="dept-budget" type="number" placeholder="8000000">
+  </div>
+  <div class="fgroup">
+    <label class="flbl">Posisi (tekan Enter untuk menambah)</label>
+    <input class="finput" id="pos-inp" placeholder="Ketik nama posisi lalu tekan Enter" onkeydown="addPos(event)">
+    <div id="pos-tags" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px"></div>
+  </div>
+  <div class="factions">
+    <button class="btn" onclick="closeM('mo-dept')">Batal</button>
+    <button class="btn btn-primary" onclick="saveDept()">Simpan</button>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA DEFAULTS
+// ═══════════════════════════════════════════
+const DD=[
+  {id:'d1',name:'Floor',budget:4500000,positions:['Restaurant Manager','Assistant Floor Manager','Floor Supervisor','Floor Captain','Hostess','Waiter / Waitress','Runner','Housekeeping']},
+  {id:'d2',name:'Kitchen',budget:8000000,positions:['Head Chef','Sous Chef','CDP','CDP Pastry','Demi Chef','Demi Chef Pastry','Commis','Steward']},
+  {id:'d3',name:'Bar',budget:6000000,positions:['Bar Captain','Senior Bar','Barista','Barback']},
+  {id:'d4',name:'Back Office',budget:9000000,positions:['HR Manager','Accounting Manager','Finance Manager','Accounting Staff','Finance Staff','Purchasing Staff','Storekeeper','Graphic Designer','Marketing']},
+];
+const DS=[
+  {id:'c1',name:'Andi Pratama',phone:'+62 812-3456-7890',email:'andi.pratama@email.com',dept:'Floor',pos:'Waiter / Waitress',status:'Interview',salary:3500000,rec:'Recommended',ref:'Yes',rating:4,notes:'2 tahun pengalaman di restoran bintang, komunikasi sangat baik.',cv:'',cvName:'andi_cv.pdf',added:'2025-04-10',schedules:[{id:'s1',date:'2025-04-21',time:'10:00',loc:'Ruang Rapat A',interviewer:'Budi Manajer',notes:'Fokus pada pengalaman service'}]},
+  {id:'c2',name:'Sari Dewi',phone:'+62 813-2345-6789',email:'sari.dewi@email.com',dept:'Kitchen',pos:'Commis',status:'Screening',salary:4000000,rec:'Recommended',ref:'Pending',rating:3,notes:'Fresh graduate dari sekolah kuliner, motivasi tinggi.',cv:'',cvName:'',added:'2025-04-12',schedules:[]},
+  {id:'c3',name:'Budi Santoso',phone:'+62 857-1234-5678',email:'budi.s@email.com',dept:'Bar',pos:'Barista',status:'Offered',salary:4200000,rec:'Recommended',ref:'Yes',rating:5,notes:'Skill barista sangat excellent, menang kompetisi regional.',cv:'',cvName:'budi_cv.pdf',added:'2025-04-08',schedules:[]},
+  {id:'c4',name:'Rina Lestari',phone:'+62 878-9876-5432',email:'rina.l@email.com',dept:'Back Office',pos:'Accounting Staff',status:'Screening',salary:5000000,rec:'',ref:'Pending',rating:2,notes:'Perlu pengembangan skill Excel dan software akuntansi.',cv:'',cvName:'',added:'2025-04-14',schedules:[]},
+  {id:'c5',name:'Doni Kusuma',phone:'+62 821-4567-8901',email:'doni.k@email.com',dept:'Kitchen',pos:'Sous Chef',status:'Interview',salary:8000000,rec:'Recommended',ref:'Yes',rating:4,notes:'5 tahun di hotel bintang 5, spesialis masakan continental.',cv:'',cvName:'doni_cv.pdf',added:'2025-04-09',schedules:[{id:'s2',date:'2025-04-22',time:'14:00',loc:'Dapur Utama',interviewer:'Head Chef Anton',notes:'Uji kompetensi memasak langsung'}]},
+  {id:'c6',name:'Maya Putri',phone:'+62 812-9988-7766',email:'maya.p@email.com',dept:'Floor',pos:'Hostess',status:'Rejected',salary:3200000,rec:'Not Recommended',ref:'No',rating:1,notes:'Attitude kurang profesional saat interview, tidak tepat waktu.',cv:'',cvName:'',added:'2025-04-07',schedules:[]},
+  {id:'c7',name:'Reza Hakim',phone:'+62 856-3344-5566',email:'reza.h@email.com',dept:'Back Office',pos:'HR Manager',status:'Offered',salary:12000000,rec:'Recommended',ref:'Yes',rating:5,notes:'10 tahun pengalaman HR di perusahaan F&B multinasional. Sangat cocok.',cv:'',cvName:'reza_cv.pdf',added:'2025-04-06',schedules:[]},
+  {id:'c8',name:'Fifi Anggraini',phone:'+62 877-4455-6677',email:'fifi.a@email.com',dept:'Bar',pos:'Bar Captain',status:'Onboarding',salary:5500000,rec:'Recommended',ref:'Yes',rating:4,notes:'Mulai onboarding minggu ini. Sangat antusias bergabung.',cv:'',cvName:'fifi_cv.pdf',added:'2025-04-01',schedules:[]},
+  {id:'c9',name:'Teguh Prasetyo',phone:'+62 831-2233-4455',email:'teguh.p@email.com',dept:'Kitchen',pos:'Head Chef',status:'Interview',salary:15000000,rec:'Recommended',ref:'Pending',rating:4,notes:'Executive chef sebelumnya di JW Marriott, portofolio sangat kuat.',cv:'',cvName:'teguh_cv.pdf',added:'2025-04-15',schedules:[]},
+  {id:'c10',name:'Nisa Rahmawati',phone:'+62 856-7788-9900',email:'nisa.r@email.com',dept:'Floor',pos:'Floor Supervisor',status:'Screening',salary:6000000,rec:'',ref:'Pending',rating:3,notes:'Pengalaman 3 tahun sebagai supervisor di café chain.',cv:'',cvName:'',added:'2025-04-16',schedules:[]},
+];
+
+let cands=[],depts=[],actLog=[],notifs=[],sbUrl='',sbKey='',pendingCVFile=null,editId=null,editDeptId=null,tempPos=[],curView='table',detailCandId=null;
+
+const SC={Screening:'#4f8ef7',Interview:'#fbbf24',Offered:'#34d399',Onboarding:'#a78bfa',Rejected:'#f87171'};
+const SORD=['Screening','Interview','Offered','Onboarding','Rejected'];
+const AVC=[['rgba(79,142,247,.2)','#4f8ef7'],['rgba(52,211,153,.2)','#34d399'],['rgba(251,191,36,.2)','#fbbf24'],['rgba(167,139,250,.2)','#a78bfa'],['rgba(248,113,113,.2)','#f87171'],['rgba(45,212,191,.2)','#2dd4bf'],['rgba(249,115,22,.2)','#f97316'],['rgba(236,72,153,.2)','#ec4899']];
+const avs=n=>{const i=(n.charCodeAt(0)+n.charCodeAt(n.length-1))%AVC.length;return`background:${AVC[i][0]};color:${AVC[i][1]}`};
+const ini=n=>n.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+const fmtSal=s=>s?'IDR '+parseInt(s).toLocaleString('id-ID'):'-';
+const uid=()=>'id'+Date.now()+Math.random().toString(36).slice(2,6);
+const nowStr=()=>new Date().toLocaleString('id-ID',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+const sBadge=s=>{const m={Screening:'b-sc',Interview:'b-iv',Offered:'b-of',Rejected:'b-rj',Onboarding:'b-ob'};return`<span class="badge ${m[s]||''}">${s}</span>`};
+const rBadge=r=>r?r==='Recommended'?`<span class="badge b-rec">✓ Rec</span>`:`<span class="badge b-nrec">✕ Not rec</span>`:'';
+
+// ═══════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════
+async function loadData(){
+  const tryGet=async(k)=>{
+    if(window.storage){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):null;}catch(e){return null;}}
+    try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}
+  };
+  cands=(await tryGet('jmc4-cands'))||DS;
+  depts=(await tryGet('jmc4-depts'))||DD;
+  actLog=(await tryGet('jmc4-act'))||[];
+  notifs=(await tryGet('jmc4-notifs'))||[];
+  const sb=await tryGet('jmc4-sb');
+  if(sb){sbUrl=sb.url||'';sbKey=sb.key||'';}
+  if(sbUrl&&sbKey){document.getElementById('sb-url').value=sbUrl;document.getElementById('sb-key').value=sbKey;}
+  document.getElementById('setup-banner').classList.toggle('hidden',!!(sbUrl&&sbKey));
+  updateNavCnt();updateNotifBadge();renderDash();
+}
+
+async function saveData(){
+  const trySave=async(k,v)=>{
+    if(window.storage){try{await window.storage.set(k,JSON.stringify(v));}catch(e){}}
+    try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}
+  };
+  await trySave('jmc4-cands',cands);
+  await trySave('jmc4-depts',depts);
+  await trySave('jmc4-act',actLog.slice(0,300));
+  await trySave('jmc4-notifs',notifs.slice(0,100));
+}
+
+async function saveSBConfig(){
+  sbUrl=document.getElementById('sb-url').value.trim();
+  sbKey=document.getElementById('sb-key').value.trim();
+  const save=async(k,v)=>{if(window.storage)try{await window.storage.set(k,JSON.stringify(v));}catch(e){}try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
+  await save('jmc4-sb',{url:sbUrl,key:sbKey});
+  document.getElementById('setup-banner').classList.toggle('hidden',!!(sbUrl&&sbKey));
+}
+
+async function testSB(){
+  const url=document.getElementById('sb-url').value.trim();
+  const key=document.getElementById('sb-key').value.trim();
+  const el=document.getElementById('sb-status');
+  if(!url||!key){el.style.color='var(--red)';el.textContent='Masukkan URL dan anon key terlebih dahulu.';return;}
+  el.style.color='var(--text2)';el.textContent='Menghubungkan...';
+  try{
+    const r=await fetch(`${url}/storage/v1/bucket`,{headers:{'apikey':key,'Authorization':`Bearer ${key}`}});
+    if(r.ok){el.style.color='var(--green)';el.textContent='✓ Koneksi berhasil! Cloud storage aktif.';toast('Supabase terhubung');}
+    else{el.style.color='var(--red)';el.textContent='✗ Koneksi gagal. Cek URL dan anon key.';}
+  }catch(e){el.style.color='var(--red)';el.textContent='✗ Error: '+e.message;}
+}
+
+async function uploadCV(file){
+  const fname=`cv_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  if(sbUrl&&sbKey){
+    const r=await fetch(`${sbUrl}/storage/v1/object/cvs/${fname}`,{method:'POST',headers:{'apikey':sbKey,'Authorization':`Bearer ${sbKey}`,'Content-Type':file.type},body:file});
+    if(!r.ok)throw new Error('Upload gagal: '+r.status);
+    return[`${sbUrl}/storage/v1/object/public/cvs/${fname}`,file.name];
+  }
+  return new Promise((res,rej)=>{const rd=new FileReader();rd.onload=e=>res([e.target.result,file.name]);rd.onerror=rej;rd.readAsDataURL(file);});
+}
+
+// ═══════════════════════════════════════════
+// NOTIFICATIONS & LOG
+// ═══════════════════════════════════════════
+function addNotif(msg,type='info'){
+  notifs.unshift({id:uid(),msg,type,time:nowStr(),read:false});
+  if(notifs.length>100)notifs.pop();
+  updateNotifBadge();
+}
+function updateNotifBadge(){
+  const u=notifs.filter(n=>!n.read).length;
+  const el=document.getElementById('notif-badge');
+  el.textContent=u;el.style.display=u?'':'none';
+}
+function markAllRead(){notifs.forEach(n=>n.read=true);saveData();updateNotifBadge();renderNotifs();}
+function markRead(id){const n=notifs.find(x=>x.id===id);if(n){n.read=true;saveData();updateNotifBadge();}}
+function log(msg){actLog.unshift({id:uid(),msg,time:nowStr()});if(actLog.length>300)actLog.pop();}
+function handleCVSelect(e){
+  const f=e.target.files[0];if(!f)return;
+  pendingCVFile=f;
+  document.getElementById('cv-label').innerHTML=`<svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="opacity:.6;margin-bottom:4px"><path d="M4 8h8M4 5h8M4 11h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><div style="font-weight:600">${f.name}</div><div style="font-size:10px;opacity:.6;margin-top:2px">${(f.size/1024).toFixed(0)} KB — siap diupload</div>`;
+}
+function toast(msg,dur=2600){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+function updateNavCnt(){document.getElementById('nav-cnt').textContent=cands.length;}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function go(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const nav=document.getElementById('nav-'+name);if(nav)nav.classList.add('active');
+  const titles={dashboard:'Dashboard',notifications:'Notifikasi',candidates:'Manajemen Kandidat',pipeline:'Pipeline Rekrutmen',schedule:'Jadwal Interview',salary:'Perbandingan Gaji',reports:'Laporan & Export',activity:'Activity Log',departments:'Departemen & Posisi',setup:'Storage Setup'};
+  document.getElementById('page-title').textContent=titles[name]||name;
+  const acts=document.getElementById('topbar-actions');acts.innerHTML='';
+  if(name==='candidates'){
+    acts.innerHTML=`<button class="btn btn-sm" onclick="quickExport()"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 1h7l3 3v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.3"/><path d="M8 6v6M5 9l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Export</button><button class="btn btn-primary btn-sm" onclick="openCandModal()"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Tambah Kandidat</button>`;
+    renderCands();
+  }
+  if(name==='dashboard')renderDash();
+  if(name==='notifications')renderNotifs();
+  if(name==='pipeline')renderPipe();
+  if(name==='schedule')renderSchedule();
+  if(name==='salary')renderSalary();
+  if(name==='reports')initReports();
+  if(name==='activity')renderAct();
+  if(name==='departments')renderDepts();
+}
+
+function quickExport(){
+  if(confirm('Export ke Excel?\n\nOK = Excel (.xlsx)\nBatal = CSV'))exportExcel();else exportCSV();
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+function renderDash(){
+  const tot=cands.length,rec=cands.filter(c=>c.rec==='Recommended').length;
+  const inv=cands.filter(c=>c.status==='Interview').length;
+  const off=cands.filter(c=>c.status==='Offered').length;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card" style="--accent:var(--blue)"><div class="stat-lbl">Total Kandidat</div><div class="stat-val">${tot}</div></div>
+    <div class="stat-card" style="--accent:var(--green)"><div class="stat-lbl">Recommended</div><div class="stat-val" style="color:var(--green)">${rec}</div><div class="stat-sub">${tot?Math.round(rec/tot*100):0}% dari total</div></div>
+    <div class="stat-card" style="--accent:var(--amber)"><div class="stat-lbl">Dalam Interview</div><div class="stat-val" style="color:var(--amber)">${inv}</div></div>
+    <div class="stat-card" style="--accent:var(--purple)"><div class="stat-lbl">Penawaran Dikirim</div><div class="stat-val" style="color:var(--purple)">${off}</div></div>`;
+  document.getElementById('pipe-chart').innerHTML=SORD.map(s=>{
+    const n=cands.filter(c=>c.status===s).length,pct=tot?Math.round(n/tot*100):0;
+    return`<div class="pipe-row"><div class="pipe-lbl">${s}</div><div class="pipe-track"><div class="pipe-fill" style="width:${pct}%;background:${SC[s]}"></div></div><div class="pipe-cnt">${n}</div></div>`;
+  }).join('');
+  const dc={};cands.forEach(c=>{dc[c.dept]=(dc[c.dept]||0)+1});
+  const dcols=['#4f8ef7','#fbbf24','#34d399','#a78bfa','#f97316'];
+  document.getElementById('dept-chart').innerHTML=Object.entries(dc).sort((a,b)=>b[1]-a[1]).map(([d,n],i)=>{
+    const pct=tot?Math.round(n/tot*100):0;
+    return`<div class="hbar"><div class="hbl">${d}</div><div class="hbt"><div class="hbf" style="width:${pct}%;background:${dcols[i%5]}"></div></div><div class="hbv">${n}</div></div>`;
+  }).join('')||'<div class="empty">Belum ada data</div>';
+  const today=new Date().toISOString().split('T')[0];
+  const tmrw=new Date(Date.now()+86400000).toISOString().split('T')[0];
+  const upcoming=[];
+  cands.forEach(c=>(c.schedules||[]).forEach(s=>{if(s.date===today||s.date===tmrw)upcoming.push({...s,cname:c.name,cpos:c.pos,cid:c.id});}));
+  upcoming.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  document.getElementById('upcoming-int').innerHTML=upcoming.length?upcoming.map(s=>{
+    const d=new Date(s.date+'T00:00:00');
+    return`<div class="sched-card" onclick="openDet('${s.cid}')">
+      <div class="sched-date"><div class="sched-day">${d.getDate()}</div><div class="sched-mo">${d.toLocaleString('id-ID',{month:'short'})}</div></div>
+      <div class="sched-info"><div class="sched-name">${s.cname}</div><div class="sched-meta">${s.cpos}</div><div class="sched-loc">${s.time}${s.loc?' · '+s.loc:''}</div></div>
+      <span class="badge b-sch">Interview</span>
+    </div>`;
+  }).join(''):'<div class="empty" style="padding:20px">Tidak ada interview hari ini & besok</div>';
+  const recent=[...cands].sort((a,b)=>new Date(b.added)-new Date(a.added)).slice(0,5);
+  document.getElementById('recent-tbl').innerHTML=`<table><thead><tr><th>Nama</th><th>Posisi</th><th>Dept</th><th>Status</th><th>Rating</th></tr></thead><tbody>${
+    recent.map(c=>`<tr class="dr" onclick="openDet('${c.id}')"><td><div class="nm-cell"><div class="av" style="${avs(c.name)};width:26px;height:26px;font-size:9px">${ini(c.name)}</div>${c.name}</div></td><td>${c.pos}</td><td><span class="tag">${c.dept}</span></td><td>${sBadge(c.status)}</td><td style="color:var(--amber);font-size:12px">${c.rating?'★'.repeat(c.rating):'-'}</td></tr>`).join('')
+  }</tbody></table>`;
+}
+
+// ═══════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════
+function renderNotifs(){
+  const nc={info:'var(--blue)',success:'var(--green)',warning:'var(--amber)',danger:'var(--red)'};
+  document.getElementById('notif-list').innerHTML=notifs.length?notifs.map(n=>`
+    <div class="notif-item ${n.read?'read':''}" onclick="markRead('${n.id}');this.classList.add('read');updateNotifBadge()">
+      <div class="nd ${n.read?'read':'unread'}" style="${!n.read?`background:${nc[n.type]||nc.info};box-shadow:0 0 8px ${nc[n.type]||nc.info}`:''}"></div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:${n.read?400:600}">${n.msg}</div>
+        <div class="notif-time">${n.time}</div>
+      </div>
+    </div>`).join(''):'<div class="empty"><div class="empty-icon">🔔</div>Belum ada notifikasi</div>';
+}
+
+// ═══════════════════════════════════════════
+// CANDIDATES
+// ═══════════════════════════════════════════
+function getFiltered(){
+  const q=(document.getElementById('si')||{}).value?.toLowerCase()||'';
+  const fd=(document.getElementById('fd')||{}).value||'';
+  const fp=(document.getElementById('fp')||{}).value||'';
+  const fs=(document.getElementById('fs')||{}).value||'';
+  const fr=(document.getElementById('fr')||{}).value||'';
+  const fref=(document.getElementById('fref')||{}).value||'';
+  return cands.filter(c=>{
+    if(fd&&c.dept!==fd)return false;
+    if(fp&&c.pos!==fp)return false;
+    if(fs&&c.status!==fs)return false;
+    if(fr&&c.rec!==fr)return false;
+    if(fref&&c.ref!==fref)return false;
+    if(q&&![c.name,c.pos,c.dept,c.email,c.phone,c.notes||''].join(' ').toLowerCase().includes(q))return false;
+    return true;
+  });
+}
+function populateFilters(){
+  const fds=document.getElementById('fd');if(!fds)return;
+  const cur=fds.value;
+  fds.innerHTML='<option value="">Semua dept</option>'+depts.map(d=>`<option${cur===d.name?' selected':''}>${d.name}</option>`).join('');
+  updatePosFilter();
+}
+function updatePosFilter(){
+  const fds=document.getElementById('fd'),fps=document.getElementById('fp');if(!fds||!fps)return;
+  const selD=depts.find(d=>d.name===fds.value);const curP=fps.value;
+  fps.innerHTML='<option value="">Semua posisi</option>'+(selD?selD.positions:depts.flatMap(d=>d.positions)).map(p=>`<option${curP===p?' selected':''}>${p}</option>`).join('');
+}
+function cvLink(c){
+  if(!c.cvName&&!c.cv)return'<span style="color:var(--text3);font-size:10px">—</span>';
+  if(c.cv&&c.cv.startsWith('http'))return`<a href="${c.cv}" style="font-size:10px;color:var(--blue);text-decoration:none;font-weight:700" target="_blank">↓ CV</a>`;
+  if(c.cv&&c.cv.startsWith('data:'))return`<span style="font-size:10px;color:var(--blue);cursor:pointer;font-weight:700" onclick="dlLocal('${c.id}')">↓ CV</span>`;
+  return`<span style="font-size:10px;color:var(--text3)">${(c.cvName||'').slice(0,12)}</span>`;
+}
+function dlLocal(id){
+  const c=cands.find(x=>x.id===id);if(!c||!c.cv)return;
+  const a=document.createElement('a');a.href=c.cv;a.download=c.cvName||'cv';document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+function renderCands(){
+  populateFilters();
+  const filtered=getFiltered();
+  const v=document.getElementById('cands-view');
+  if(curView==='table'){
+    if(!filtered.length){v.innerHTML='<div class="empty"><div class="empty-icon">🔍</div>Tidak ada kandidat yang cocok.</div>';return;}
+    v.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Nama</th><th>Telepon</th><th>Posisi</th><th>Dept</th><th>Status</th><th>Gaji (IDR)</th><th>Rec</th><th>Ref</th><th>★</th><th>CV</th><th>Jadwal</th><th></th></tr></thead><tbody>${
+      filtered.map(c=>`<tr class="dr">
+        <td onclick="openDet('${c.id}')"><div class="nm-cell"><div class="av" style="${avs(c.name)};width:28px;height:28px;font-size:9px;font-weight:700">${ini(c.name)}</div><span style="font-weight:600">${c.name}</span></div></td>
+        <td style="color:var(--text2);font-size:11px;font-family:var(--mono)">${c.phone}</td>
+        <td style="font-size:12px">${c.pos}</td>
+        <td><span class="tag">${c.dept}</span></td>
+        <td>${sBadge(c.status)}</td>
+        <td style="font-size:11px;color:var(--text2);font-family:var(--mono)">${c.salary?parseInt(c.salary).toLocaleString('id-ID'):'-'}</td>
+        <td>${rBadge(c.rec)}</td>
+        <td><span class="badge ${c.ref==='Yes'?'b-rec':c.ref==='No'?'b-nrec':'b-pend'}">${c.ref||'Pending'}</span></td>
+        <td style="color:var(--amber);font-size:12px">${c.rating?'★'.repeat(c.rating):'-'}</td>
+        <td>${cvLink(c)}</td>
+        <td>${(c.schedules||[]).length?`<span class="badge b-sch">${c.schedules.length} sesi</span>`:'<span style="color:var(--text3);font-size:10px">—</span>'}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-xs" onclick="openCandModal('${c.id}')" style="margin-right:3px">Edit</button>
+          <button class="btn btn-xs btn-danger" onclick="delCand('${c.id}')">Del</button>
+        </td>
+      </tr>`).join('')
+    }</tbody></table></div>`;
+  } else {
+    v.innerHTML=`<div class="kanban">${SORD.map(s=>{
+      const col=filtered.filter(c=>c.status===s);
+      return`<div class="k-col"><div class="k-hdr" style="color:${SC[s]}">${s}<span class="k-cnt">${col.length}</span></div>${
+        col.map(c=>`<div class="k-card" style="--col:${SC[c.status]}" onclick="openDet('${c.id}')"><div class="k-name">${c.name}</div><div class="k-pos">${c.pos}</div><div class="k-dept">${c.dept}</div><div class="k-foot">${rBadge(c.rec)||'<span></span>'}<span style="color:var(--amber);font-size:10px">${c.rating?'★'.repeat(c.rating):''}</span></div></div>`).join('')||'<div style="font-size:10px;color:var(--text3);padding:4px 0">Kosong</div>'
+      }</div>`;
+    }).join('')}</div>`;
+  }
+}
+function setView(v){
+  curView=v;
+  document.getElementById('vt-t').classList.toggle('active',v==='table');
+  document.getElementById('vt-k').classList.toggle('active',v==='kanban');
+  renderCands();
+}
+
+// ═══════════════════════════════════════════
+// PIPELINE
+// ═══════════════════════════════════════════
+function renderPipe(){
+  const tot=cands.length;
+  document.getElementById('pipe-kanban').innerHTML=`
+    <div class="sec-card" style="margin-bottom:16px">
+      <div class="progress-steps">${SORD.map((s,i)=>`
+        ${i>0?`<div class="step-line" style="background:${cands.filter(c=>c.status===SORD[i-1]).length>0?SC[SORD[i-1]]:'var(--border)'}"></div>`:''}
+        <div class="step">
+          <div class="step-circle" style="background:${SC[s]};border-color:${SC[s]};color:#000">${cands.filter(c=>c.status===s).length}</div>
+          <div class="step-lbl" style="color:${SC[s]}">${s}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="kanban">${SORD.map(s=>{
+      const col=cands.filter(c=>c.status===s);
+      return`<div class="k-col"><div class="k-hdr" style="color:${SC[s]}">${s}<span class="k-cnt">${col.length}</span></div>${
+        col.map(c=>`<div class="k-card" style="--col:${SC[c.status]}" onclick="openDet('${c.id}')"><div class="k-name">${c.name}</div><div class="k-pos">${c.pos}</div><div class="k-dept">${c.dept}</div><div class="k-foot">${rBadge(c.rec)||'<span></span>'}<span style="color:var(--amber);font-size:10px">${c.rating?'★'.repeat(c.rating):''}</span></div></div>`).join('')||'<div style="font-size:10px;color:var(--text3);padding:5px 0">Kosong</div>'
+      }</div>`;
+    }).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════
+// SCHEDULE
+// ═══════════════════════════════════════════
+function renderSchedule(){
+  const all=[];
+  cands.forEach(c=>(c.schedules||[]).forEach(s=>all.push({...s,cname:c.name,cpos:c.pos,cdept:c.dept,cid:c.id})));
+  all.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  const today=new Date().toISOString().split('T')[0];
+  const upcoming=all.filter(s=>s.date>=today),past=all.filter(s=>s.date<today);
+  document.getElementById('schedule-content').innerHTML=`
+    <div class="tab-bar">
+      <button class="tab-btn active" id="st-u" onclick="switchSchedTab('u')">Akan Datang (${upcoming.length})</button>
+      <button class="tab-btn" id="st-p" onclick="switchSchedTab('p')">Sudah Lewat (${past.length})</button>
+    </div>
+    <div id="sch-u">${upcoming.length?upcoming.map(s=>schedCard(s)).join(''):'<div class="empty sec-card"><div class="empty-icon">📅</div>Belum ada jadwal interview.</div>'}</div>
+    <div id="sch-p" style="display:none">${past.length?past.map(s=>schedCard(s,true)).join(''):'<div class="empty sec-card"><div class="empty-icon">📋</div>Belum ada riwayat interview.</div>'}
+    </div>`;
+}
+function schedCard(s,past=false){
+  const d=new Date(s.date+'T00:00:00');
+  return`<div class="sched-card" style="opacity:${past?.75:1}" onclick="openDet('${s.cid}')">
+    <div class="sched-date" style="${past?'background:var(--bg3);border-color:var(--border)':''}">
+      <div class="sched-day" style="${past?'color:var(--text2)':''}">${d.getDate()}</div>
+      <div class="sched-mo" style="${past?'color:var(--text3)':''}">${d.toLocaleString('id-ID',{month:'short'})}</div>
+    </div>
+    <div class="sched-info">
+      <div class="sched-name">${s.cname}</div>
+      <div class="sched-meta">${s.cpos} · ${s.cdept}</div>
+      <div class="sched-loc">${s.time}${s.interviewer?' · '+s.interviewer:''}${s.loc?' · '+s.loc:''}</div>
+      ${s.notes?`<div style="font-size:10px;color:var(--text3);margin-top:2px">${s.notes}</div>`:''}
+    </div>
+    <span class="badge ${past?'b-pend':'b-sch'}">${past?'Selesai':'Terjadwal'}</span>
+  </div>`;
+}
+function switchSchedTab(t){
+  document.getElementById('sch-u').style.display=t==='u'?'':'none';
+  document.getElementById('sch-p').style.display=t==='p'?'':'none';
+  document.getElementById('st-u').classList.toggle('active',t==='u');
+  document.getElementById('st-p').classList.toggle('active',t==='p');
+}
+function saveSchedule(){
+  const c=cands.find(x=>x.id===detailCandId);if(!c)return;
+  const date=document.getElementById('sch-date').value;
+  const time=document.getElementById('sch-time').value;
+  if(!date||!time){toast('Tanggal dan waktu wajib diisi');return;}
+  if(!c.schedules)c.schedules=[];
+  c.schedules.push({id:uid(),date,time,loc:document.getElementById('sch-loc').value,interviewer:document.getElementById('sch-interviewer').value,notes:document.getElementById('sch-notes').value});
+  if(c.status==='Screening')c.status='Interview';
+  log(`Jadwal interview: ${c.name} — ${date} ${time}`);
+  addNotif(`Interview dijadwalkan: ${c.name} pada ${date} pukul ${time}`,'success');
+  saveData();document.getElementById('det-sched-form').classList.add('hidden');
+  openDet(detailCandId);toast('Jadwal disimpan');renderDash();
+}
+
+// ═══════════════════════════════════════════
+// SALARY
+// ═══════════════════════════════════════════
+function renderSalary(){
+  const budgets={};depts.forEach(d=>budgets[d.name]=d.budget||0);
+  const maxSal=Math.max(...cands.filter(c=>c.salary>0).map(c=>c.salary),...Object.values(budgets),1);
+  const selDept=(document.getElementById('sal-fd')||{}).value||'';
+  const selStat=(document.getElementById('sal-fs')||{}).value||'';
+
+  let html=`<div class="sec-card">
+    <div class="sec-hdr">
+      <span class="sec-title">Expected Salary vs Budget Departemen</span>
+      <div style="display:flex;gap:6px">
+        <select class="fi" id="sal-fd" onchange="renderSalary()"><option value="">Semua dept</option>${depts.map(d=>`<option${selDept===d.name?' selected':''}>${d.name}</option>`).join('')}</select>
+        <select class="fi" id="sal-fs" onchange="renderSalary()"><option value="">Semua status</option>${SORD.map(s=>`<option${selStat===s?' selected':''}>${s}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="sal-legend">
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:8px;border-radius:2px;background:var(--blue);opacity:.7"></div>Expected salary kandidat</div>
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:2px;background:var(--red)"></div>Budget departemen</div>
+    </div>`;
+
+  let filtered=cands.filter(c=>c.salary>0);
+  if(selDept)filtered=filtered.filter(c=>c.dept===selDept);
+  if(selStat)filtered=filtered.filter(c=>c.status===selStat);
+  filtered.sort((a,b)=>(b.salary||0)-(a.salary||0));
+
+  if(!filtered.length){html+='<div class="empty">Tidak ada data gaji.</div></div>';document.getElementById('salary-content').innerHTML=html;return;}
+
+  html+=filtered.map(c=>{
+    const budget=budgets[c.dept]||0;
+    const pct=Math.round(c.salary/maxSal*100);
+    const bpct=budget?Math.round(budget/maxSal*100):0;
+    const diff=budget?c.salary-budget:0;
+    return`<div class="sal-item">
+      <div class="sal-name-row">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+          <div class="av" style="${avs(c.name)};width:24px;height:24px;font-size:8px;font-weight:700">${ini(c.name)}</div>
+          <span style="font-weight:700;font-size:12px">${c.name}</span>
+          <span class="tag">${c.dept}</span>
+          <span style="font-size:10px;color:var(--text3)">${c.pos}</span>
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">${sBadge(c.status)}${rBadge(c.rec)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="sal-bar-track" style="flex:1">
+          <div class="sal-bar-fill" style="width:${pct}%;background:${c.rec==='Recommended'?'var(--blue)':'var(--text3)'}"></div>
+          ${bpct?`<div class="sal-bar-budget" style="left:${bpct}%"></div>`:''}
+        </div>
+        <div class="sal-amount" style="font-family:var(--mono)">${(c.salary).toLocaleString('id-ID')}</div>
+        ${diff?`<span style="font-size:10px;font-weight:700;color:${diff>0?'var(--red)':'var(--green)'};white-space:nowrap">${diff>0?'+':'-'}${Math.abs(diff).toLocaleString('id-ID')}</span>`:''}
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+
+  html+=`<div class="sec-card" style="margin-top:12px"><div class="sec-hdr"><span class="sec-title">Ringkasan per Departemen</span></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">`;
+  depts.forEach(d=>{
+    const dc=cands.filter(c=>c.dept===d.name&&c.salary>0);
+    const avg=dc.length?Math.round(dc.reduce((a,c)=>a+c.salary,0)/dc.length):0;
+    const budget=d.budget||0;const diff=budget&&avg?avg-budget:0;
+    html+=`<div class="sal-item"><div class="sal-name-row"><span style="font-weight:700">${d.name}</span><span class="tag">${dc.length} kandidat</span></div>
+      <div style="font-size:14px;font-weight:800;font-family:var(--mono);color:var(--text);margin:3px 0">${avg?avg.toLocaleString('id-ID'):'-'}</div>
+      ${budget?`<div style="font-size:10px;color:${diff>0?'var(--red)':'var(--green)'};font-weight:600">${diff>0?'↑ Di atas':'↓ Di bawah'} budget ${Math.abs(diff).toLocaleString('id-ID')}</div>`:''}
+    </div>`;
+  });
+  html+=`</div></div>`;
+  document.getElementById('salary-content').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════
+// REPORTS
+// ═══════════════════════════════════════════
+function initReports(){
+  const ds=document.getElementById('exp-dept');
+  if(ds)ds.innerHTML='<option value="">Semua departemen</option>'+depts.map(d=>`<option>${d.name}</option>`).join('');
+  const ps=document.getElementById('pdf-cand-sel');
+  if(ps)ps.innerHTML='<option value="">-- Pilih kandidat --</option>'+[...cands].sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name} — ${c.pos}</option>`).join('');
+}
+function switchRepTab(t){
+  ['export','pdf','summary'].forEach(x=>{
+    document.getElementById('rep-tab-'+x).classList.toggle('active',x===t);
+    document.getElementById('rep-'+x).style.display=x===t?'':'none';
+  });
+  if(t==='summary')renderSummary();
+}
+function renderSummary(){
+  const el=document.getElementById('summary-content');if(!el)return;
+  const tot=cands.length;
+  const avgR=tot?Math.round(cands.reduce((a,c)=>a+(c.rating||0),0)/tot*10)/10:0;
+  const withSal=cands.filter(c=>c.salary>0);
+  const avgS=withSal.length?Math.round(withSal.reduce((a,c)=>a+c.salary,0)/withSal.length):0;
+  el.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+      <div class="sum-stat"><div class="sum-val">${tot}</div><div class="sum-lbl">Total Kandidat</div></div>
+      <div class="sum-stat"><div class="sum-val" style="color:var(--amber)">${avgR} ★</div><div class="sum-lbl">Avg Rating</div></div>
+      <div class="sum-stat"><div class="sum-val" style="font-size:14px;font-family:var(--mono)">${avgS?avgS.toLocaleString('id-ID'):'-'}</div><div class="sum-lbl">Avg Expected Salary</div></div>
+    </div>
+    <div class="grid2">
+      <div class="sec-card"><div class="sec-hdr"><span class="sec-title">Status Pipeline</span></div>${SORD.map(s=>{const n=cands.filter(c=>c.status===s).length;return`<div class="pipe-row"><div class="pipe-lbl">${s}</div><div class="pipe-track"><div class="pipe-fill" style="width:${tot?Math.round(n/tot*100):0}%;background:${SC[s]}"></div></div><div class="pipe-cnt">${n}</div></div>`}).join('')}</div>
+      <div class="sec-card"><div class="sec-hdr"><span class="sec-title">Per Departemen</span></div>${depts.map(d=>{const n=cands.filter(c=>c.dept===d.name).length;return`<div class="pipe-row"><div class="pipe-lbl">${d.name}</div><div class="pipe-track"><div class="pipe-fill" style="width:${tot?Math.round(n/tot*100):0}%;background:var(--blue)"></div></div><div class="pipe-cnt">${n}</div></div>`}).join('')}</div>
+      <div class="sec-card"><div class="sec-hdr"><span class="sec-title">Rekomendasi</span></div>${[['Recommended',cands.filter(c=>c.rec==='Recommended').length,'var(--green)'],['Not Recommended',cands.filter(c=>c.rec==='Not Recommended').length,'var(--red)'],['Belum ditentukan',cands.filter(c=>!c.rec).length,'var(--text3)']].map(([l,n,col])=>`<div class="pipe-row"><div class="pipe-lbl" style="width:120px;font-size:10px">${l}</div><div class="pipe-track"><div class="pipe-fill" style="width:${tot?Math.round(n/tot*100):0}%;background:${col}"></div></div><div class="pipe-cnt">${n}</div></div>`).join('')}</div>
+      <div class="sec-card"><div class="sec-hdr"><span class="sec-title">Reference Check</span></div>${[['Yes','var(--green)'],['Pending','var(--text3)'],['No','var(--red)']].map(([r,col])=>{const n=cands.filter(c=>c.ref===r).length;return`<div class="pipe-row"><div class="pipe-lbl">${r}</div><div class="pipe-track"><div class="pipe-fill" style="width:${tot?Math.round(n/tot*100):0}%;background:${col}"></div></div><div class="pipe-cnt">${n}</div></div>`}).join('')}</div>
+    </div>`;
+}
+function renderPDFPreview(){
+  const id=document.getElementById('pdf-cand-sel').value;
+  const wrap=document.getElementById('pdf-preview-wrap');
+  const acts=document.getElementById('pdf-actions');
+  if(!id){wrap.innerHTML='';acts.classList.add('hidden');return;}
+  const c=cands.find(x=>x.id===id);if(!c)return;
+  acts.classList.remove('hidden');
+  wrap.innerHTML=`<div class="pdf-preview" id="pdf-area">
+    <div style="text-align:center;border-bottom:3px solid #1a56db;padding-bottom:14px;margin-bottom:16px">
+      <div style="font-size:20px;font-weight:800;color:#1a56db;letter-spacing:-.5px">JAYA MAKMUR CUISINE</div>
+      <div style="font-size:11px;color:#666;margin-top:3px;font-weight:500">Candidate Profile — Confidential</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding:12px;background:#f8f9fa;border-radius:8px">
+      <div style="width:52px;height:52px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#1d4ed8;flex-shrink:0">${ini(c.name)}</div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:#111">${c.name}</div>
+        <div style="font-size:12px;color:#555;margin-top:2px">${c.pos} · ${c.dept}</div>
+        <div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap">
+          <span style="background:${c.status==='Offered'?'#d1fae5':c.status==='Rejected'?'#fee2e2':'#dbeafe'};color:${c.status==='Offered'?'#065f46':c.status==='Rejected'?'#991b1b':'#1e40af'};padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">${c.status}</span>
+          ${c.rec?`<span style="background:${c.rec==='Recommended'?'#d1fae5':'#fee2e2'};color:${c.rec==='Recommended'?'#065f46':'#991b1b'};padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">${c.rec}</span>`:''}
+        </div>
+      </div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px">
+      ${[['Email',c.email],['Telepon',c.phone],['Expected Salary',fmtSal(c.salary)],['Reference Check',c.ref||'Pending'],['Rating',c.rating?'★'.repeat(c.rating)+` (${c.rating}/5)`:'Belum dirating'],['CV / Resume',c.cvName||'Tidak ada'],['Tanggal Daftar',c.added]].map(([k,v])=>`<tr><td style="padding:7px 10px;background:#f8f9fa;font-weight:700;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.05em;width:140px;border:1px solid #e5e7eb">${k}</td><td style="padding:7px 10px;border:1px solid #e5e7eb;color:#111">${v}</td></tr>`).join('')}
+    </table>
+    ${c.notes?`<div style="margin-bottom:14px"><div style="font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Catatan</div><div style="font-size:12px;line-height:1.7;background:#f8f9fa;padding:10px;border-radius:6px;border:1px solid #e5e7eb;color:#111">${c.notes}</div></div>`:''}
+    ${(c.schedules||[]).length?`<div><div style="font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Jadwal Interview</div>${c.schedules.map(s=>`<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 10px;margin-bottom:5px;font-size:11px;color:#1e3a5f"><strong>${s.date} pukul ${s.time}</strong>${s.loc?' · '+s.loc:''}${s.interviewer?' · Interviewer: '+s.interviewer:''}</div>`).join('')}</div>`:''}
+    <div style="margin-top:18px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #e5e7eb;padding-top:10px">Generated by JMC Recruit · Jaya Makmur Cuisine · ${new Date().toLocaleDateString('id-ID',{year:'numeric',month:'long',day:'numeric'})}</div>
+  </div>`;
+}
+function printPDF(){
+  const area=document.getElementById('pdf-area');if(!area)return;
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>Candidate Profile - JMC Recruit</title><style>*{box-sizing:border-box}body{font-family:system-ui,sans-serif;padding:28px;color:#111;max-width:800px;margin:auto}@media print{body{padding:0}@page{margin:20mm}}</style></head><body>${area.innerHTML}</body></html>`);
+  w.document.close();w.focus();setTimeout(()=>{w.print();},300);
+}
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
+function getExportData(){
+  const dept=(document.getElementById('exp-dept')||{}).value||'';
+  const status=(document.getElementById('exp-status')||{}).value||'';
+  let data=[...cands];
+  if(dept)data=data.filter(c=>c.dept===dept);
+  if(status)data=data.filter(c=>c.status===status);
+  return data;
+}
+function exportExcel(){
+  const data=getExportData();
+  if(!window.XLSX){toast('Library Excel belum siap, coba lagi');return;}
+  const hdrs=['No','Nama Lengkap','Telepon','Email','Departemen','Posisi','Status','Expected Salary (IDR)','Rekomendasi','Reference Check','Rating','CV File','Catatan','Tanggal Daftar','Jml Interview Dijadwalkan'];
+  const rows=[hdrs];
+  data.forEach((c,i)=>rows.push([i+1,c.name,c.phone,c.email,c.dept,c.pos,c.status,c.salary||0,c.rec||'',c.ref||'',(c.rating||0),c.cvName||'',(c.notes||'').replace(/\n/g,' '),c.added,(c.schedules||[]).length]));
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:4},{wch:22},{wch:17},{wch:26},{wch:13},{wch:24},{wch:12},{wch:18},{wch:16},{wch:14},{wch:6},{wch:20},{wch:35},{wch:14},{wch:8}];
+  XLSX.utils.book_append_sheet(wb,ws,'Data Kandidat');
+  const sum=[['Departemen','Total Kandidat','Recommended','Avg Expected Salary','Budget Dept'],
+    ...depts.map(d=>{
+      const dc=cands.filter(c=>c.dept===d.name);
+      const avg=dc.filter(c=>c.salary>0).length?Math.round(dc.filter(c=>c.salary>0).reduce((a,c)=>a+c.salary,0)/dc.filter(c=>c.salary>0).length):0;
+      return[d.name,dc.length,dc.filter(c=>c.rec==='Recommended').length,avg,d.budget||0];
+    })];
+  const ws2=XLSX.utils.aoa_to_sheet(sum);
+  ws2['!cols']=[{wch:15},{wch:14},{wch:14},{wch:22},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Ringkasan Dept');
+  XLSX.writeFile(wb,`JMC_Rekrutmen_${new Date().toISOString().split('T')[0]}.xlsx`);
+  log(`Export Excel: ${data.length} kandidat`);
+  addNotif(`${data.length} kandidat berhasil diexport ke Excel`,'success');
+  saveData();toast('Excel berhasil didownload ✓');
+}
+function exportCSV(){
+  const data=getExportData();
+  const hdrs=['Nama','Telepon','Email','Departemen','Posisi','Status','Gaji (IDR)','Rekomendasi','Reference Check','Rating','CV','Catatan','Tanggal'];
+  const rows=data.map(c=>[c.name,c.phone,c.email,c.dept,c.pos,c.status,c.salary||'',c.rec||'',c.ref||'',c.rating||'',c.cvName||'',(c.notes||'').replace(/"/g,"'").replace(/\n/g,' '),c.added].map(v=>`"${v}"`).join(','));
+  const blob=new Blob(['\uFEFF'+[hdrs.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`JMC_Kandidat_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  log(`Export CSV: ${data.length} kandidat`);saveData();toast('CSV berhasil didownload ✓');
+}
+
+// ═══════════════════════════════════════════
+// ACTIVITY
+// ═══════════════════════════════════════════
+function renderAct(){
+  document.getElementById('act-list').innerHTML=actLog.length?actLog.map(a=>`<div class="act-item"><div class="act-dot"></div><div style="flex:1">${a.msg}</div><div class="act-time">${a.time}</div></div>`).join(''):'<div class="empty"><div class="empty-icon">📋</div>Belum ada aktivitas.</div>';
+}
+async function clearAct(){if(!confirm('Hapus semua log aktivitas?'))return;actLog=[];await saveData();renderAct();}
+
+// ═══════════════════════════════════════════
+// DEPARTMENTS
+// ═══════════════════════════════════════════
+function renderDepts(){
+  document.getElementById('dept-list').innerHTML=depts.map(d=>`
+    <div class="dept-item">
+      <div class="dept-hdr">
+        <span>${d.name} <span style="font-weight:400;font-size:10px;color:var(--text3)">(${d.positions.length} posisi${d.budget?` · Budget: IDR ${d.budget.toLocaleString('id-ID')}`:''})</span></span>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-sm" onclick="openDeptModal('${d.id}')">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="delDept('${d.id}')">Hapus</button>
+        </div>
+      </div>
+      <div class="dept-pos">${d.positions.map(p=>`<span class="ptag">${p}</span>`).join('')}</div>
+    </div>`).join('');
+}
+function openDeptModal(id){
+  editDeptId=id||null;
+  const d=id?depts.find(x=>x.id===id):null;
+  document.getElementById('dept-m-title').textContent=id?'Edit Departemen':'Tambah Departemen';
+  document.getElementById('dept-nm').value=d?.name||'';
+  document.getElementById('dept-budget').value=d?.budget||'';
+  tempPos=[...(d?.positions||[])];renderPosTags();
+  document.getElementById('mo-dept').classList.remove('hidden');
+}
+function addPos(e){
+  if(e.key!=='Enter')return;
+  const v=e.target.value.trim();
+  if(v&&!tempPos.includes(v)){tempPos.push(v);renderPosTags();}
+  e.target.value='';e.preventDefault();
+}
+function renderPosTags(){
+  document.getElementById('pos-tags').innerHTML=tempPos.map((p,i)=>`<span class="ptag">${p}<button class="pdel" onclick="tempPos.splice(${i},1);renderPosTags()">×</button></span>`).join('');
+}
+async function saveDept(){
+  const name=document.getElementById('dept-nm').value.trim();
+  if(!name){toast('Nama departemen wajib diisi');return;}
+  const budget=parseInt(document.getElementById('dept-budget').value)||0;
+  if(editDeptId){const i=depts.findIndex(d=>d.id===editDeptId);depts[i]={...depts[i],name,budget,positions:[...tempPos]};log(`Update dept: ${name}`);}
+  else{depts.push({id:uid(),name,budget,positions:[...tempPos]});log(`Tambah dept: ${name}`);}
+  await saveData();closeM('mo-dept');renderDepts();toast('Departemen disimpan');
+}
+async function delDept(id){
+  const d=depts.find(x=>x.id===id);
+  if(!d||!confirm(`Hapus departemen "${d.name}"?\nSemua posisi di departemen ini akan terhapus.`))return;
+  depts=depts.filter(x=>x.id!==id);log(`Hapus dept: ${d.name}`);
+  await saveData();renderDepts();toast('Departemen dihapus');
+}
+
+// ═══════════════════════════════════════════
+// CANDIDATE MODAL
+// ═══════════════════════════════════════════
+function openCandModal(id){
+  editId=id||null;pendingCVFile=null;
+  const m=id?cands.find(c=>c.id===id):null;
+  document.getElementById('mc-title').textContent=id?'Edit Kandidat':'Tambah Kandidat';
+  ['c-name','c-phone','c-email','c-notes'].forEach(f=>document.getElementById(f).value=m?.[f.replace('c-','')==='notes'?'notes':f.replace('c-','').replace('sal','salary')]||m?.[{name:'name',phone:'phone',email:'email',notes:'notes'}[f.replace('c-','')]]||'':'');
+  document.getElementById('c-name').value=m?.name||'';
+  document.getElementById('c-phone').value=m?.phone||'';
+  document.getElementById('c-email').value=m?.email||'';
+  document.getElementById('c-notes').value=m?.notes||'';
+  document.getElementById('c-sal').value=m?.salary||'';
+  document.getElementById('c-status').value=m?.status||'Screening';
+  document.getElementById('c-rec').value=m?.rec||'';
+  document.getElementById('c-ref').value=m?.ref||'Pending';
+  document.getElementById('c-dept').innerHTML='<option value="">Pilih departemen</option>'+depts.map(d=>`<option${m?.dept===d.name?' selected':''}>${d.name}</option>`).join('');
+  updPos(m?.pos);setRating(m?.rating||0);
+  const cvl=document.getElementById('cv-label');
+  cvl.innerHTML=m?.cvName?`<svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="opacity:.5;margin-bottom:4px"><path d="M4 8h8M4 5h8M4 11h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><div style="font-weight:600">${m.cvName}</div><div style="font-size:10px;margin-top:2px;opacity:.5">Klik untuk ganti file</div>`:`<svg width="20" height="20" viewBox="0 0 16 16" fill="none" style="margin-bottom:5px;opacity:.3"><path d="M3 12h10M8 3v7M5 6l3-3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg><div>Klik atau drag untuk upload CV</div><div style="font-size:10px;margin-top:2px;opacity:.6">PDF, DOC, DOCX — maks 4MB (lokal) / tidak terbatas (Supabase)</div>`;
+  document.getElementById('cv-prog').style.display='none';
+  // Progress bar
+  const si=m?Math.max(0,SORD.indexOf(m.status)):0;
+  document.getElementById('cand-prog').innerHTML=`<div class="progress-steps">${SORD.map((s,i)=>`${i>0?`<div class="step-line ${i<=si?'done':''}"></div>`:''}<div class="step"><div class="step-circle ${i<si?'done':i===si?'current':''}" style="${i<=si?`background:${SC[s]};border-color:${SC[s]};color:#000`:''}">${i<si?'✓':i+1}</div><div class="step-lbl ${i===si?'current':''}" style="${i===si?`color:${SC[s]}`:''}">${s}</div></div>`).join('')}</div>`;
+  document.getElementById('mo-cand').classList.remove('hidden');
+}
+function updPos(sel){
+  const dept=document.getElementById('c-dept').value;
+  const d=depts.find(x=>x.name===dept);
+  document.getElementById('c-pos').innerHTML='<option value="">Pilih posisi</option>'+(d?d.positions.map(p=>`<option${sel===p?' selected':''}>${p}</option>`).join(''):'');
+}
+function setRating(r){
+  document.getElementById('c-rating').value=r;
+  document.querySelectorAll('#c-stars span').forEach(s=>s.classList.toggle('lit',parseInt(s.dataset.r)<=r));
+}
+async function saveCand(){
+  const name=document.getElementById('c-name').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const phone=document.getElementById('c-phone').value.trim();
+  const dept=document.getElementById('c-dept').value;
+  const pos=document.getElementById('c-pos').value;
+  if(!name||!email||!dept||!pos){toast('⚠ Lengkapi field wajib: nama, email, dept, posisi');return;}
+  let cvUrl='',cvName='';
+  const existing=editId?cands.find(c=>c.id===editId):null;
+  cvUrl=existing?.cv||'';cvName=existing?.cvName||'';
+  if(pendingCVFile){
+    const prog=document.getElementById('cv-prog');
+    const fill=document.getElementById('cv-prog-fill');
+    prog.style.display='block';fill.style.width='20%';
+    try{fill.style.width='60%';[cvUrl,cvName]=await uploadCV(pendingCVFile);fill.style.width='100%';toast(sbUrl&&sbKey?'CV terupload ke Supabase ✓':'CV tersimpan lokal ✓');}
+    catch(e){toast('Upload CV gagal: '+e.message);prog.style.display='none';}
+  }
+  const newStatus=document.getElementById('c-status').value;
+  const data={name,phone,email,dept,pos,status:newStatus,salary:parseInt(document.getElementById('c-sal').value)||0,rec:document.getElementById('c-rec').value,ref:document.getElementById('c-ref').value,rating:parseInt(document.getElementById('c-rating').value)||0,notes:document.getElementById('c-notes').value,cv:cvUrl,cvName};
+  if(editId){
+    const i=cands.findIndex(c=>c.id===editId);
+    const old=cands[i];
+    if(old.status!==newStatus){log(`Status ${name}: ${old.status} → ${newStatus}`);addNotif(`Status berubah: ${name} — ${old.status} → ${newStatus}`,newStatus==='Offered'?'success':newStatus==='Rejected'?'danger':'info');}
+    cands[i]={...cands[i],...data};log(`Update: ${name} (${pos})`);toast('Kandidat diperbarui ✓');
+  } else {
+    cands.push({id:uid(),...data,added:new Date().toISOString().split('T')[0],schedules:[]});
+    log(`Tambah: ${name} — ${pos} (${dept})`);addNotif(`Kandidat baru: ${name} — ${pos} (${dept})`,'info');toast('Kandidat ditambahkan ✓');
+  }
+  await saveData();closeM('mo-cand');updateNavCnt();renderCands();renderDash();
+}
+async function delCand(id){
+  const c=cands.find(x=>x.id===id);
+  if(!c||!confirm(`Hapus kandidat "${c.name}"?\nTindakan ini tidak dapat dibatalkan.`))return;
+  log(`Hapus: ${c.name} (${c.pos})`);
+  cands=cands.filter(x=>x.id!==id);
+  await saveData();closeM('mo-detail');updateNavCnt();renderCands();renderDash();toast('Kandidat dihapus');
+}
+
+// ═══════════════════════════════════════════
+// DETAIL MODAL
+// ═══════════════════════════════════════════
+function openDet(id){
+  detailCandId=id;
+  const c=cands.find(x=>x.id===id);if(!c)return;
+  document.getElementById('det-edit').onclick=()=>{closeM('mo-detail');openCandModal(id)};
+  document.getElementById('det-del').onclick=()=>delCand(id);
+  document.getElementById('det-sched-btn').onclick=()=>{
+    const f=document.getElementById('det-sched-form');
+    f.classList.toggle('hidden');
+    if(!f.classList.contains('hidden')){
+      document.getElementById('sch-date').value=new Date().toISOString().split('T')[0];
+      document.getElementById('sch-time').value='09:00';
+      ['sch-loc','sch-interviewer','sch-notes'].forEach(x=>document.getElementById(x).value='');
+    }
+  };
+  const scheds=c.schedules||[];
+  document.getElementById('det-content').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div class="av" style="${avs(c.name)};width:46px;height:46px;font-size:16px;font-weight:800">${ini(c.name)}</div>
+      <div>
+        <div style="font-size:16px;font-weight:800;letter-spacing:-.3px">${c.name}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">${c.pos} · ${c.dept}</div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">${sBadge(c.status)}${rBadge(c.rec)}</div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 0;margin-top:10px">
+      <div class="detail-row"><div class="dkey">Email</div><div style="color:var(--blue)">${c.email}</div></div>
+      <div class="detail-row"><div class="dkey">Telepon</div><div style="font-family:var(--mono)">${c.phone}</div></div>
+      <div class="detail-row"><div class="dkey">Expected Salary</div><div style="font-weight:700;font-family:var(--mono)">${fmtSal(c.salary)}</div></div>
+      <div class="detail-row"><div class="dkey">Reference Check</div><div><span class="badge ${c.ref==='Yes'?'b-rec':c.ref==='No'?'b-nrec':'b-pend'}">${c.ref||'Pending'}</span></div></div>
+      <div class="detail-row"><div class="dkey">Rating</div><div style="color:var(--amber);font-size:16px">${c.rating?'★'.repeat(c.rating)+'<span style="color:var(--border2)">'+'★'.repeat(5-c.rating)+'</span>':'<span style="color:var(--text3)">Belum dirating</span>'}</div></div>
+      <div class="detail-row"><div class="dkey">CV / Resume</div><div>${cvLink(c)||'<span style="color:var(--text3)">Belum ada CV</span>'}</div></div>
+      <div class="detail-row"><div class="dkey">Tanggal Daftar</div><div style="color:var(--text2);font-family:var(--mono)">${c.added}</div></div>
+    </div>
+    ${c.notes?`<div class="divider"></div><div style="margin-top:10px"><div class="dkey" style="margin-bottom:6px">Catatan</div><div style="font-size:12px;line-height:1.7;background:var(--bg3);padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border)">${c.notes}</div></div>`:''}
+    ${scheds.length?`<div class="divider"></div><div style="margin-top:10px"><div class="dkey" style="margin-bottom:7px">Jadwal Interview (${scheds.length})</div>${scheds.map(s=>`<div style="background:var(--teal-l);border:1px solid rgba(45,212,191,.2);border-radius:var(--radius);padding:8px 11px;margin-bottom:6px;font-size:11px"><span style="font-weight:700;color:var(--teal)">${s.date} — ${s.time}</span>${s.loc?'<span style="color:var(--text2)"> · '+s.loc+'</span>':''}${s.interviewer?'<span style="color:var(--text3)"> · '+s.interviewer+'</span>':''}</div>`).join('')}</div>`:''}`;
+  document.getElementById('det-sched-form').classList.add('hidden');
+  document.getElementById('mo-detail').classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+function closeM(id){document.getElementById(id).classList.add('hidden');}
+['mo-cand','mo-detail','mo-dept'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeM(id);});
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')['mo-cand','mo-detail','mo-dept'].forEach(closeM);});
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+loadData();
+</script>
+</body>
+</html>
